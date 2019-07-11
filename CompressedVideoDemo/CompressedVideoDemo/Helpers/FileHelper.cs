@@ -8,16 +8,17 @@ namespace CompressedVideoDemo.Helpers
 {
     static class FileHelper
     {
+        public static string directoryPath = "";
+        public static string PictureDirectoryPath = "";
+#if _ANDROID_
+        directoryPath = System.IO.Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, "CompressedVideo");
 
-#if __ANDROID__
-        public static readonly string directoryPath = System.IO.Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, "CompressedVideo");
-
-        public static readonly string PictureDirectoryPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures) + "/CompressedVideo";
+        PictureDirectoryPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures) + "/CompressedVideo";
 #endif
-#if __IOS__
-                public static readonly string PictureDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/CompressedVideo";
+#if _IOS_
+                PictureDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/CompressedVideo";
 
-               public static readonly string directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos) + "/CompressedVideo";
+               directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos) + "/CompressedVideo";
 #endif
 
         static FileHelper()
@@ -25,29 +26,31 @@ namespace CompressedVideoDemo.Helpers
             CheckAndCreateAppDirectory();
         }
 
-        public static string CreateVideoDirectory( )
+        public static string CreateVideoDirectory()
         {
             if (!Directory.Exists(directoryPath))
             {
-              Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(directoryPath);
             }
             return directoryPath;
         }
-#if __IOS__		
-		public static string GetUniqueVideoName(string ext)
-            {
-			return System.Guid.NewGuid().ToString().Replace("-", "") + ext;
-			}
-#endif
-
-#if __ANDROID__
 
         public static string GetUniqueVideoName(string ext)
         {
-            return "VID_" + System.DateTime.Now.ToString("yyyyMMddHHmmssfff") + (ext ?? "");
-        }
+            string nomeArquivo = "";
+
+#if _IOS_
+			nomeArquivo =  System.Guid.NewGuid().ToString().Replace("-", "") + ext;
+			
 #endif
-       
+
+#if _ANDROID_
+
+            nomeArquivo =  "VID_" + System.DateTime.Now.ToString("yyyyMMddHHmmssfff") + (ext ?? "");
+#endif
+            return nomeArquivo;
+        }
+
         public static string CreateNewVideoPath()
         {
             return Path.Combine(CreateVideoDirectory(), GetUniqueVideoName(".mp4"));
@@ -83,7 +86,7 @@ namespace CompressedVideoDemo.Helpers
             return MapPicturePath(string.Format("{0}{1}", DateTime.Now.ToString("yyyyMMddhhmmssfff"), ext));
         }
 
-      
+
         public static string GetExtension(string filename, string defaultExt)
         {
             return filename == null ? defaultExt : filename.Split('.').LastOrDefault() ?? defaultExt;
@@ -91,4 +94,3 @@ namespace CompressedVideoDemo.Helpers
 
     }
 }
-

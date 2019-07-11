@@ -14,23 +14,37 @@ namespace CompressedVideoDemo.Views
         {
             InitializeComponent();
             BindingContext = viewModel = new CompressVideoViewModel();
-            _destFile = Helpers.FileHelper.CreateNewVideoPath();
+            try
+            {
+                _destFile = Helpers.FileHelper.CreateNewVideoPath();
+            }catch(Exception e)
+            {
+                Console.WriteLine("Erro: " + e);
+            }
         }
         private async void ChooseVideoAndCompressBtn_Clicked(object Sender, EventArgs e)
         {
-            var actions = new string[] { "Open Camera", "Open Gallery" };
-            var action = await App.Current.MainPage.DisplayActionSheet("Choose Video", "Cancel", null, actions);
-            if (actions[0].Equals(action))
+            try
             {
-                viewModel.VideoPath = await DependencyServices.mobileFeature.RecordVideo();
-                await App.Current.MainPage.DisplayAlert("Success", "Video is saved to gallery", "ok");
-                CompressVideo();
+                var actions = new string[] { "Open Camera", "Open Gallery" };
+                var action = await App.Current.MainPage.DisplayActionSheet("Choose Video", "Cancel", null, actions);
+                if (actions[0].Equals(action))
+                {
+                    viewModel.VideoPath = await DependencyServices.mobileFeature.RecordVideo();
+                    await App.Current.MainPage.DisplayAlert("Success", "Video is saved to gallery", "ok");
+                    CompressVideo();
+                }
+                else if (actions[1].Equals(action))
+                {
+                    viewModel.VideoPath = await DependencyServices.mobileFeature.SelectVideo();
+                    CompressVideo();
+                }
             }
-            else if (actions[1].Equals(action))
+            catch(Exception er)
             {
-                viewModel.VideoPath = await DependencyServices.mobileFeature.SelectVideo();
-                CompressVideo();
+                Console.WriteLine("erro: " + er);
             }
+           
         }
 
         private async void CompressVideo()
